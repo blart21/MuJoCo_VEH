@@ -1,0 +1,8 @@
+mujoco==3.2.3
+glfw
+numpy
+matplotlib
+numpy-stl
+PyQt5
+pynput
+pygame

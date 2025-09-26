@@ -1,0 +1,119 @@
+<mujoco model="car">
+  <compiler inertiafromgeom="true"/>
+  <option timestep="0.002" gravity="0 0 -9.81"/>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" rgb1="0.2 0.3 0.4" rgb2="0.8 0.8 0.8" width="512" height="512"/>
+    <material name="grid_mat" texture="grid" texrepeat="5 5" specular="0.3" shininess="0.3"/>
+    <texture name="wheel_pattern" type="2d" builtin="checker" rgb1="1 1 1" rgb2="0 0 0" width="64" height="64"/>
+    <material name="wheel_mat" texture="wheel_pattern" texrepeat="8 1" specular="0.5" shininess="0.5"/>
+  </asset>
+
+  <worldbody>
+    <geom name="floor" type="plane" size="150 150 0.3" rgba="0.8 0.8 0.8 1" material="grid_mat" friction="1.0 0.2 0.01"/>
+
+    <!-- ===== 차량1 (원본 그대로) ===== -->
+    <body name="chassis" pos="0 0 0.4">
+      <inertial pos="0.15 0 0" mass="1500" diaginertia="460 2160 1000"/>
+      <!-- 모든 자유도 허용 -->
+      <joint name="root" type="free"/>
+
+      <geom name="chassis_geom" type="box" size="1.55 1.5 0.09" rgba="1 0 0 1"/>
+
+      <site name="driver_seat" pos="0.15 0.75 0.09" size="0.015" rgba="1 0 1 0.5"/>
+      <site name="lidar_left"  pos="0.15  2   0.5" size="0.01" rgba="1 0 0 1"/>
+      <site name="lidar_right" pos="0.15 -2   0.5" size="0.01" rgba="1 0 0 1"/>
+      <site name="lidar_front" pos="1.8 0 0.6" size="0.02" rgba="0 1 0 1"/>
+
+
+      <!-- Front Left Suspension & Wheel -->
+      <body name="fl_susp" pos="1.55 1.65 0.0">
+        <inertial pos="0 0 0" mass="25" diaginertia="0.001 0.001 0.001"/>
+        <joint name="fl_suspension" type="slide" axis="0 0 1" damping="1000" range="-0.1 0.1"/>
+        <!-- 조향 hinge를 wheel body에 직접 연결 -->
+        <body name="front_left_wheel" pos="0 0 -0.09">
+          <joint name="steer_fl" type="hinge" axis="0 0 -1" range="-1.5 1.5"/>
+          <joint name="fl_wheel"  type="hinge" axis="0 1 0" damping="0.01"/>
+          <geom  name="fl_geom"   type="cylinder" size="0.3 0.09" euler="90 0 0" material="wheel_mat" mass="35" friction="1.2 0.3 0.02"/>
+        </body>
+      </body>
+
+      <!-- Front Right Suspension & Wheel -->
+      <body name="fr_susp" pos="1.55 -1.65 0.0">
+        <inertial pos="0 0 0" mass="25" diaginertia="0.001 0.001 0.001"/>
+        <joint name="fr_suspension" type="slide" axis="0 0 1" damping="1000" range="-0.1 0.1"/>
+        <!-- 조향 hinge를 wheel body에 직접 연결 -->
+        <body name="front_right_wheel" pos="0 0 -0.09">
+          <joint name="steer_fr" type="hinge" axis="0 0 -1" range="-1.5 1.5"/>
+          <joint name="fr_wheel"  type="hinge" axis="0 1 0" damping="0.01"/>
+          <geom  name="fr_geom"   type="cylinder" size="0.3 0.09" euler="90 0 0" material="wheel_mat" mass="35" friction="1.2 0.3 0.02"/>
+        </body>
+      </body>
+
+      <!-- Rear Left Suspension & Wheel -->
+      <body name="rl_susp" pos="-1.55 1.65 0.0">
+        <inertial pos="0 0 0" mass="25" diaginertia="0.001 0.001 0.001"/>
+        <joint name="rl_suspension" type="slide" axis="0 0 1" damping="1000" range="-0.1 0.1"/>
+        <body name="rear_left_wheel" pos="0 0 -0.09">
+          <joint name="rl_wheel" type="hinge" axis="0 1 0" damping="0.01"/>
+          <geom  name="rl_geom"  type="cylinder" size="0.3 0.09" euler="90 0 0" material="wheel_mat" mass="35" friction="1.2 0.3 0.02"/>
+        </body>
+      </body>
+
+      <!-- Rear Right Suspension & Wheel -->
+      <body name="rr_susp" pos="-1.55 -1.65 0.0">
+        <inertial pos="0 0 0" mass="25" diaginertia="0.001 0.001 0.001"/>
+        <joint name="rr_suspension" type="slide" axis="0 0 1" damping="1000" range="-0.1 0.1"/>
+        <body name="rear_right_wheel" pos="0 0 -0.09">
+          <joint name="rr_wheel" type="hinge" axis="0 1 0" damping="0.01"/>
+          <geom  name="rr_geom"  type="cylinder" size="0.3 0.09" euler="90 0 0" material="wheel_mat" mass="35" friction="1.2 0.3 0.02"/>
+        </body>
+      </body>
+    </body>
+    <!-- ===== 차량1 끝 ===== -->
+
+    <!-- ========== 차량2 (정적 장애물: 모양만, 기능 없음) ========== -->
+    <!-- joint(관절) 없음 → 월드에 용접됨(고정). AEB/레이더의 장애물로만 사용 -->
+    <body name="target_car" pos="30 0 0.4">
+      <!-- 차체 모양 -->
+      <geom name="target_chassis" type="box" size="1.55 1.5 0.09" rgba="0 0 1 1"/>
+
+      <!-- 바퀴 모양(지오메트리만, 동작 없음) -->
+      <geom name="target_fl_wheel" type="cylinder" size="0.3 0.09"
+            pos=" 1.55  1.65 -0.09" euler="90 0 0" material="wheel_mat" rgba="0.2 0.2 0.2 1"/>
+      <geom name="target_fr_wheel" type="cylinder" size="0.3 0.09"
+            pos=" 1.55 -1.65 -0.09" euler="90 0 0" material="wheel_mat" rgba="0.2 0.2 0.2 1"/>
+      <geom name="target_rl_wheel" type="cylinder" size="0.3 0.09"
+            pos="-1.55  1.65 -0.09" euler="90 0 0" material="wheel_mat" rgba="0.2 0.2 0.2 1"/>
+      <geom name="target_rr_wheel" type="cylinder" size="0.3 0.09"
+            pos="-1.55 -1.65 -0.09" euler="90 0 0" material="wheel_mat" rgba="0.2 0.2 0.2 1"/>
+    </body>
+    <!-- ===== 차량2 끝 ===== -->
+
+  </worldbody>
+
+  <sensor>
+    <accelerometer name="accel_z" site="driver_seat"/>
+    <gyro name="gyro_pitch" site="driver_seat"/>
+    <framepos name="lidar_left_pos"  objtype="site" objname="lidar_left"/>
+    <framepos name="lidar_right_pos" objtype="site" objname="lidar_right"/>
+  </sensor>
+
+  <actuator>
+    <!-- 바퀴 구동 -->
+    <motor name="fl_motor" joint="fl_wheel" ctrlrange="-3000 3000" gear="1.0"/>
+    <motor name="fr_motor" joint="fr_wheel" ctrlrange="-3000 3000" gear="1.0"/>
+    <motor name="rl_motor" joint="rl_wheel" ctrlrange="-3000 3000" gear="1.0"/>
+    <motor name="rr_motor" joint="rr_wheel" ctrlrange="-3000 3000" gear="1.0"/>
+
+    <!-- 서스펜션 -->
+    <motor name="fl_act" joint="fl_suspension" gear="1.0" ctrlrange="-12000 12000"/>
+    <motor name="fr_act" joint="fr_suspension" gear="1.0" ctrlrange="-12000 12000"/>
+    <motor name="rl_act" joint="rl_suspension" gear="1.0" ctrlrange="-12000 12000"/>
+    <motor name="rr_act" joint="rr_suspension" gear="1.0" ctrlrange="-12000 12000"/>
+
+    <!-- 조향 -->
+    <motor name="steer_fl_motor" joint="steer_fl" ctrlrange="-1.5 1.5" gear="20000"/>
+    <motor name="steer_fr_motor" joint="steer_fr" ctrlrange="-1.5 1.5" gear="20000"/>
+  </actuator>
+</mujoco>

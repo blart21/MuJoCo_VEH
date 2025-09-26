@@ -1,0 +1,17 @@
+    <!-- ========== 차량2 (정적 장애물: 모양만, 기능 없음) ========== -->
+    <!-- joint(관절) 없음 → 월드에 용접됨(고정). AEB/레이더의 장애물로만 사용 -->
+    <body name="vehicle_static" pos="30 0 0.4">
+      <!-- 차체 모양 -->
+      <geom name="target_chassis" type="box" size="1.55 1.5 0.09" rgba="0 0 1 1"/>
+
+      <!-- 바퀴 모양(지오메트리만, 동작 없음) -->
+      <geom name="target_fl_wheel" type="cylinder" size="0.3 0.09"
+            pos=" 1.55  1.65 -0.09" euler="90 0 0" material="wheel_mat" rgba="0.2 0.2 0.2 1"/>
+      <geom name="target_fr_wheel" type="cylinder" size="0.3 0.09"
+            pos=" 1.55 -1.65 -0.09" euler="90 0 0" material="wheel_mat" rgba="0.2 0.2 0.2 1"/>
+      <geom name="target_rl_wheel" type="cylinder" size="0.3 0.09"
+            pos="-1.55  1.65 -0.09" euler="90 0 0" material="wheel_mat" rgba="0.2 0.2 0.2 1"/>
+      <geom name="target_rr_wheel" type="cylinder" size="0.3 0.09"
+            pos="-1.55 -1.65 -0.09" euler="90 0 0" material="wheel_mat" rgba="0.2 0.2 0.2 1"/>
+    </body>
+    <!-- ===== 차량2 끝 ===== -->
