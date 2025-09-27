@@ -1,10 +1,9 @@
 # Capstone Design
 
-0. 현재 진행중인 작업 
-    - interface, perception, vehicle, utils 계층 분리 
-    - interface : 차량 제어를 위한 입력 코드 작성 필요 
+0. 현재 진행중인 작업  
+    - interface : keyboard 입력까지 구현 완료 
     - perception : lidar 모듈 정상 작동 확인 필요 
-    - vehicle : 차량 주행 코드 이식 및 고도화 필요 
+    - vehicle : control.py 수정 필요 
     - utils : 기존 뷰어 이식 필요 
 
 1. 실행 방법
@@ -17,10 +16,10 @@ python -m main
 ```bash
 root/
 │
-├── models/                 # XML 모델 관련
-│   ├── obstacle/           # 장애물 정의의
-│   ├── scene/              # 환경 정의
-│   └── vehicle/            # 차량 정의
+├── models/                 # 모델 정의의
+│   ├── obstacle/           
+│   ├── scene/              
+│   └── vehicle/            
 │
 ├── scripts/                 # 파이썬 코드
 │   │
@@ -35,8 +34,7 @@ root/
 │   │
 │   ├── perception/          # 센서 모듈
 │   │   ├── __init__.py
-│   │   ├── control.py
-│   │   ├── ebrake.py
+│   │   ├── camera.py
 │   │   └── lidar.py
 │   │
 │   ├── utils/               # 공용 유틸리티
@@ -45,6 +43,8 @@ root/
 │   │
 │   └── vehicle/             # Vehicle 환경 정의
 │       ├── __init__.py
+│       ├── contol.py
+│       ├── ebrake.py
 │       └── vehicleEnv.py
 │
 ├── requirements.txt
@@ -55,4 +55,5 @@ root/
 3. 구현 완료 사안 
 
 4. TEST CASE 및 요구사항 
-- 개발 후 기능 정상 작동 여부 테스트 
+- 개발 후 기능 정상 작동 여부 테스트
+- 구현  

@@ -1,18 +1,15 @@
 # scripts/vehicle/vehicle.py
 
 import mujoco
-import mujoco.viewer
 import numpy as np
 import os
 
-from utils import Viewer
 from perception import LidarSensor
-from interface import InputManager
-
+from .control import compose_control
 class VehicleEnv:
 
     # Vehicle Environment 초기화
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         """
         Vehicle Environment 초기화
 
@@ -26,7 +23,7 @@ class VehicleEnv:
             None
 
         """
-        # 경로 설정
+        # 경로 
         self.vehicle_active_path = kwargs.get("vehicle_active_path", "../models/vehicle/vehicle_active.xml")
         self.vehicle_static_path = kwargs.get("vehicle_static_path", "../models/vehicle/vehicle_static.xml")
         self.actuator_path = kwargs.get("actuator_path", "../models/vehicle/actuator.xml")
@@ -37,9 +34,7 @@ class VehicleEnv:
         self.model = mujoco.MjModel.from_xml_string(xml)
         self.data = mujoco.MjData(self.model)
 
-        #-------------------------------------------------
-        self.input_manager = InputManager() # Input Manager 초기화
-        self.viewer = Viewer(self.model, self.data) # Viewer 초기화
+        self.suspension = [500.0, 500.0, 500.0, 500.0]
         #-------------------------------------------------
         self.lidar = LidarSensor(self.model, self.data) # Lidar 초기화
         #-------------------------------------------------
@@ -57,14 +52,10 @@ class VehicleEnv:
         scene_path = os.path.join(base_dir, self.scene_path)
 
         # 파일 읽기
-        with open(active_path, "r", encoding="utf-8") as f:
-            active_xml = f.read()
-        with open(static_path, "r", encoding="utf-8") as f:
-            static_xml = f.read()
-        with open(actuator_path, "r", encoding="utf-8") as f:
-            actuator_xml = f.read()
-        with open(scene_path, "r", encoding="utf-8") as f:
-            scene_xml = f.read()
+        with open(active_path, "r", encoding="utf-8") as f   : active_xml = f.read()
+        with open(static_path, "r", encoding="utf-8") as f   : static_xml = f.read()
+        with open(actuator_path, "r", encoding="utf-8") as f : actuator_xml = f.read()
+        with open(scene_path, "r", encoding="utf-8") as f    : scene_xml = f.read()
 
         # placeholder 치환
         scene_xml = scene_xml.replace("<!--VEHICLE_ACTIVE INCLUDE-->", active_xml)
@@ -81,23 +72,22 @@ class VehicleEnv:
 
     # Vehicle Environment 진행 
     def step(self, action):
-        self.data.ctrl[:] = np.array(action)
+        """
+        Args:
+            action (dict): {"throttle", "reverse", "steer", "brake"}
+        """
+        suspension = [500.0, 500.0, 500.0, 500.0]
+        ctrl = compose_control(action, suspension)
+
+        # MuJoCo step
+        self.data.ctrl[:] = ctrl
         mujoco.mj_step(self.model, self.data)
 
         obs = self._get_obs()
-        reward = 0.0  # placeholder
-        done = self.done
-        info = {}
+        reward, done, info = 0.0, self.done, {}
+
         return obs, reward, done, info
 
     # Vehicle Observation 반환 
     def _get_obs(self):
         return np.concatenate([self.data.qpos, self.data.qvel])
-
-    # Vehicle Rendering 
-    def render(self):
-        self.viewer.render()
-
-    # Vehicle Environment 종료 
-    def close(self):
-        self.viewer.close()

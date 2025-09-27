@@ -3,7 +3,6 @@
 import numpy as np
 import mujoco
 
-
 class LidarSensor:
     def __init__(self, model, data, **kwargs):
         """

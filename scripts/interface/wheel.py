@@ -1,1 +1,10 @@
 # scripts/interface/wheel.py
+
+import numpy as np
+class WheelController:
+    def __init__(self, device_id=0):
+        # 레이싱휠 초기화 예정
+        self.device_id = device_id
+
+    def get_action(self):
+        return np.array([0.0, 0.0, 0.0, 0.0])
