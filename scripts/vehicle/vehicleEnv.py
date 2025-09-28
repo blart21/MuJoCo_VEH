@@ -76,7 +76,7 @@ class VehicleEnv:
         Args:
             action (dict): {"throttle", "reverse", "steer", "brake"}
         """
-        suspension = [500.0, 500.0, 500.0, 500.0]
+        suspension = [0.0, 0.0, 0.0, 0.0]
         ctrl = compose_control(action, suspension)
 
         # MuJoCo step

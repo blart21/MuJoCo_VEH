@@ -13,14 +13,21 @@ def compose_control(action, suspension, **kwargs):
     """
     controls = []
 
-    speed_ctrl = action.get("throttle", 0.0) - action.get("reverse", 0.0)
-    steer = action.get("steer", 0.0)
+    # ---- 입력값 변환 
+    throttle = action.get("throttle", 0.0)
+    reverse = action.get("reverse", 0.0)
     brake = action.get("brake", 0.0)
-    brake_scale = kwargs.get("brake_scale", 300.0)
+    steer = action.get("steer", 0.0)
 
     # ---- 모터 토크 (가속 - 브레이크) ----
+    torque_scale = kwargs.get("torque_scale", 3000.0)
+    brake_scale = kwargs.get("brake_scale", 3000.0)
+
+    foward_torque = throttle * torque_scale
+    reverse_torque = reverse * torque_scale
     brake_torque = brake * brake_scale
-    wheel_torque = speed_ctrl - brake_torque
+
+    wheel_torque = foward_torque - reverse_torque - brake_torque
 
     # 0~3: 4개 바퀴 구동 모터
     controls.append(wheel_torque)  # fl_motor
