@@ -6,6 +6,7 @@ import os
 
 from perception import LidarSensor
 from .control import compose_control
+from .ebrake import EBrake, WheelState
 class VehicleEnv:
 
     # Vehicle Environment 초기화
@@ -34,7 +35,7 @@ class VehicleEnv:
         self.model = mujoco.MjModel.from_xml_string(xml)
         self.data = mujoco.MjData(self.model)
 
-        self.suspension = [500.0, 500.0, 500.0, 500.0]
+        self.ebrake = EBrake()
         #-------------------------------------------------
         self.lidar = LidarSensor(self.model, self.data) # Lidar 초기화
         #-------------------------------------------------
@@ -76,8 +77,22 @@ class VehicleEnv:
         Args:
             action (dict): {"throttle", "reverse", "steer", "brake"}
         """
+        # 1) 기본 control 계산
         suspension = [0.0, 0.0, 0.0, 0.0]
         ctrl = compose_control(action, suspension)
+
+        # 2) 브레이크 계산
+        veh_v = np.linalg.norm(self.data.qvel[:2])  # XY 속도
+        wheel_states = [WheelState(w=0.0, R=0.3, load=self.ebrake.m * 9.81 / 4)] * 4
+        torques = self.ebrake.compute_wheel_torques(
+            pedal=action.get("brake", 0.0),
+            veh_v=veh_v,
+            wheels_front=wheel_states[:2],
+            wheels_rear=wheel_states[2:],
+            dt=self.model.opt.timestep
+        )
+
+        ctrl[:4] -= torques
 
         # MuJoCo step
         self.data.ctrl[:] = ctrl
