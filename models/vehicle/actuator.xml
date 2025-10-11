@@ -6,10 +6,10 @@
   
 <actuator>
     <!-- 바퀴 구동 -->
-    <motor name="fl_motor" joint="fl_wheel" ctrlrange="-3000 3000" gear="1.0"/>
-    <motor name="fr_motor" joint="fr_wheel" ctrlrange="-3000 3000" gear="1.0"/>
-    <motor name="rl_motor" joint="rl_wheel" ctrlrange="-3000 3000" gear="1.0"/>
-    <motor name="rr_motor" joint="rr_wheel" ctrlrange="-3000 3000" gear="1.0"/>
+    <motor name="fl_motor" joint="fl_wheel" ctrlrange="-700 700" gear="1.0"/>
+    <motor name="fr_motor" joint="fr_wheel" ctrlrange="-700 700" gear="1.0"/>
+    <motor name="rl_motor" joint="rl_wheel" ctrlrange="-700 700" gear="1.0"/>
+    <motor name="rr_motor" joint="rr_wheel" ctrlrange="-700 700" gear="1.0"/>
 
     <!-- 서스펜션 -->
     <motor name="fl_act" joint="fl_suspension" gear="1.0" ctrlrange="-12000 12000"/>
@@ -18,6 +18,6 @@
     <motor name="rr_act" joint="rr_suspension" gear="1.0" ctrlrange="-12000 12000"/>
 
     <!-- 조향 -->
-    <motor name="steer_fl_motor" joint="steer_fl" ctrlrange="-1.5 1.5" gear="20000"/>
-    <motor name="steer_fr_motor" joint="steer_fr" ctrlrange="-1.5 1.5" gear="20000"/>
+    <motor name="steer_fl_motor" joint="steer_fl" ctrlrange="-1.0 1.0" gear="3000"/>
+    <motor name="steer_fr_motor" joint="steer_fr" ctrlrange="-1.0 1.0" gear="3000"/>
 </actuator>

@@ -35,7 +35,9 @@ class VehicleEnv:
         self.model = mujoco.MjModel.from_xml_string(xml)
         self.data = mujoco.MjData(self.model)
 
-        self.ebrake = EBrake()
+        sim = type("SimpleSim", (), {"model": self.model, "data": self.data})()
+        self.ebrake = EBrake(model=self.model, data=self.data)
+
         #-------------------------------------------------
         self.lidar = LidarSensor(self.model, self.data) # Lidar 초기화
         #-------------------------------------------------

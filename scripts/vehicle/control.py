@@ -19,15 +19,11 @@ def compose_control(action, suspension, **kwargs):
     brake = action.get("brake", 0.0)
     steer = action.get("steer", 0.0)
 
-    # ---- 모터 토크 (가속 - 브레이크) ----
+    # ---- 모터 토크 (가속/후진만 계산) ----
     torque_scale = kwargs.get("torque_scale", 3000.0)
-    brake_scale = kwargs.get("brake_scale", 3000.0)
-
-    foward_torque = throttle * torque_scale
-    reverse_torque = reverse * torque_scale
-    brake_torque = brake * brake_scale
-
-    wheel_torque = foward_torque - reverse_torque - brake_torque
+    
+    # throttle(전진)과 reverse(후진)만 반영
+    wheel_torque = (throttle - reverse) * torque_scale  # ✅ 브레이크는 따로 EBrake에서 처리
 
     # 0~3: 4개 바퀴 구동 모터
     controls.append(wheel_torque)  # fl_motor
