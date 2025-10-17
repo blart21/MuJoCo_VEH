@@ -11,6 +11,16 @@
 
   <worldbody>
     <geom name="floor" type="plane" size="150 150 0.3" rgba="0.8 0.8 0.8 1" material="grid_mat" friction="1.0 0.2 0.01"/>
+    <light name="sun_key"
+       pos="0 0 12" dir="0 0 -1" directional="true"
+       diffuse="0.9 0.9 0.9" ambient="0.45 0.45 0.45" specular="0.2 0.2 0.2"
+       castshadow="false"/>
+
+    <light name="sun_fill"
+          pos="-12 10 8" dir="0 0 -1" directional="true"
+          diffuse="0.6 0.6 0.6" ambient="0.35 0.35 0.35" specular="0 0 0"
+          castshadow="false"/>
+
 
     <!-- ===== 차량1 (원본 그대로) ===== -->
     <body name="chassis" pos="0 0 0.4">
@@ -23,8 +33,9 @@
       <site name="driver_seat" pos="0.15 0.75 0.09" size="0.015" rgba="1 0 1 0.5"/>
       <site name="lidar_left"  pos="0.15  2   0.5" size="0.01" rgba="1 0 0 1"/>
       <site name="lidar_right" pos="0.15 -2   0.5" size="0.01" rgba="1 0 0 1"/>
-      <site name="lidar_front" pos="1.8 0 0.6" size="0.02" rgba="0 1 0 1"/>
-
+      <site name="lidar_front" pos="1.5 0 0.2" size="0.02" rgba="0 1 0 1"/>
+      <site name="lidar_high" pos="0 0 1.25" euler="0 0 0" size="0.01" rgba="1 0 0 1"/>
+      <site name="lidar_low"  pos="1.5 0 0.09" euler="0 0 0" size="0.01" rgba="0 0 1 1"/>
 
       <!-- Front Left Suspension & Wheel -->
       <body name="fl_susp" pos="1.55 1.65 0.0">
@@ -101,10 +112,10 @@
 
   <actuator>
     <!-- 바퀴 구동 -->
-    <motor name="fl_motor" joint="fl_wheel" ctrlrange="-3000 3000" gear="1.0"/>
-    <motor name="fr_motor" joint="fr_wheel" ctrlrange="-3000 3000" gear="1.0"/>
-    <motor name="rl_motor" joint="rl_wheel" ctrlrange="-3000 3000" gear="1.0"/>
-    <motor name="rr_motor" joint="rr_wheel" ctrlrange="-3000 3000" gear="1.0"/>
+    <motor name="fl_motor" joint="fl_wheel" ctrlrange="-10000 10000" gear="5.0"/>
+    <motor name="fr_motor" joint="fr_wheel" ctrlrange="-10000 10000" gear="5.0"/>
+    <motor name="rl_motor" joint="rl_wheel" ctrlrange="-10000 10000" gear="5.0"/>
+    <motor name="rr_motor" joint="rr_wheel" ctrlrange="-10000 10000" gear="5.0"/>
 
     <!-- 서스펜션 -->
     <motor name="fl_act" joint="fl_suspension" gear="1.0" ctrlrange="-12000 12000"/>

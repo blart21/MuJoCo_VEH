@@ -1,110 +1,152 @@
-# scripts/vehicle/vehicle.py
-
-import mujoco
-import numpy as np
+# scripts/vehicle/vehicleEnv.py
+from __future__ import annotations
 import os
+import numpy as np
+import mujoco
 
 from perception import LidarSensor
 from .control import compose_control
-from .ebrake import EBrake, WheelState
+from .ebrake import EBrake
+from .aeb import AEBRadarMulti
+
+
 class VehicleEnv:
+    """
+    단일 차량 + AEB 시뮬레이션 환경 래퍼.
 
-    # Vehicle Environment 초기화
+    - scene/base_scene.xml 에 vehicle_active / vehicle_static / actuator 를 인라인 치환하여
+      하나의 XML로 구성한 뒤 MjModel 생성
+    - EBrake(마찰손실) + AEB(AEBRadarMulti)의 제동을 병행
+    - step(action) 에서 baseline control → 페달 브레이크 → AEB 순서로 적용
+    """
+
     def __init__(self, **kwargs):
-        """
-        Vehicle Environment 초기화
-
-        Args:
-            vehicle_active_path (str): Vehicle Active Model 경로
-            vehicle_static_path (str): Vehicle Static Model 경로
-            actuator_path (str): Actuator XML 경로
-            scene_path (str): Scene Model 경로
-
-        Returns:
-            None
-
-        """
-        # 경로 
+        # ---------- 경로 ----------
         self.vehicle_active_path = kwargs.get("vehicle_active_path", "../models/vehicle/vehicle_active.xml")
         self.vehicle_static_path = kwargs.get("vehicle_static_path", "../models/vehicle/vehicle_static.xml")
-        self.actuator_path = kwargs.get("actuator_path", "../models/vehicle/actuator.xml")
-        self.scene_path = kwargs.get("scene_path", "../models/scene/base_scene.xml")
+        self.actuator_path       = kwargs.get("actuator_path",       "../models/vehicle/actuator.xml")
+        self.scene_path          = kwargs.get("scene_path",          "../models/scene/base_scene.xml")
 
-        # Vehicle Model 구성
+        # ---------- 모델 로딩/초기화 ----------
         xml = self._compose_model()
         self.model = mujoco.MjModel.from_xml_string(xml)
-        self.data = mujoco.MjData(self.model)
+        self.data  = mujoco.MjData(self.model)
 
-        sim = type("SimpleSim", (), {"model": self.model, "data": self.data})()
-        self.ebrake = EBrake(model=self.model, data=self.data)
+        # ---------- E-Brake(마찰손실) ----------
+        self.ebrake = EBrake(
+            model=self.model,
+            data=self.data,
+            frictionloss_max=2500.0,         # 제동 효과 강도
+            tau_actuator=0.05,               # 응답 지연(작을수록 빠름)
+            wheel_joint_names=["fl_wheel", "fr_wheel", "rl_wheel", "rr_wheel"],
+        )
 
-        #-------------------------------------------------
-        self.lidar = LidarSensor(self.model, self.data) # Lidar 초기화
-        #-------------------------------------------------
-        self.done = False 
+        # (선택) 라이다 래퍼
+        self.lidar = LidarSensor(self.model, self.data)
 
-    # Vehicle Model 구성 
+        # ---------- AEB(상·하 듀얼 라이다) ----------
+        # - 하단 라이다(lidar_low)만 임계/거리 오버라이드로 더 민감하게
+        self.aeb = AEBRadarMulti(
+            site_names=("lidar_high", "lidar_low"),
+            tilt_deg=-1.0,
+            ema_alpha=0.30,
+            hold_time=0.6,
+            self_clearance=0.12,
+            min_active_time=0.35,
+            cooldown_after_release=0.20,
+            consec_on_frames=2,
+            consec_off_frames=6,
+            motor_brake_K=2000.0,            # 역토크 계수(강하게)
+            clamp_ctrl=10000.0,
+            zero_drive_when_aeb=True,
+            static_brake_torque=5000.0,
+            static_brake_vmin=0.05,
+            verbose=False,
+            per_site_cfg={
+                "lidar_low": {                 # ▼ 저/낮은 물체 대응 강화
+                    "dmin_on_override": 12.0,  # 켜짐 임계 거리
+                    "dmin_off_override": 14.0, # 꺼짐 임계 거리(히스테리시스)
+                    "max_dist_override": 90.0, # 최대 레이 길이
+                }
+            },
+        )
+
+        # (디버그) 휠 액추에이터 목록
+        self._wheel_act_ids = []
+        for name in ("fl_motor", "fr_motor", "rl_motor", "rr_motor"):
+            aid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, name)
+            if aid >= 0:
+                self._wheel_act_ids.append(aid)
+
+        print(
+            "[VehicleEnv] AEB wired: sites=('lidar_high','lidar_low'), wheel_actuators:",
+            [mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, a) for a in self._wheel_act_ids],
+            flush=True,
+        )
+
+        self.done = False
+
+    # ---------- 모델 합성 ----------
     def _compose_model(self) -> str:
-        
-        base_dir = os.path.dirname(os.path.dirname(__file__))  # 프로젝트 루트
+        """
+        base_scene.xml 내부의 플레이스홀더를 실제 vehicle/actuator XML로 치환하여
+        단일 XML 문자열을 반환.
+        """
+        base_dir = os.path.dirname(os.path.dirname(__file__))  # scripts/ 기준 상위가 프로젝트 루트
 
-        # 각 XML 경로
-        active_path = os.path.join(base_dir, self.vehicle_active_path)
-        static_path = os.path.join(base_dir, self.vehicle_static_path)
+        active_path   = os.path.join(base_dir, self.vehicle_active_path)
+        static_path   = os.path.join(base_dir, self.vehicle_static_path)
         actuator_path = os.path.join(base_dir, self.actuator_path)
-        scene_path = os.path.join(base_dir, self.scene_path)
+        scene_path    = os.path.join(base_dir, self.scene_path)
 
-        # 파일 읽기
-        with open(active_path, "r", encoding="utf-8") as f   : active_xml = f.read()
-        with open(static_path, "r", encoding="utf-8") as f   : static_xml = f.read()
-        with open(actuator_path, "r", encoding="utf-8") as f : actuator_xml = f.read()
-        with open(scene_path, "r", encoding="utf-8") as f    : scene_xml = f.read()
+        with open(active_path,   "r", encoding="utf-8") as f: active_xml   = f.read()
+        with open(static_path,   "r", encoding="utf-8") as f: static_xml   = f.read()
+        with open(actuator_path, "r", encoding="utf-8") as f: actuator_xml = f.read()
+        with open(scene_path,    "r", encoding="utf-8") as f: scene_xml    = f.read()
 
-        # placeholder 치환
         scene_xml = scene_xml.replace("<!--VEHICLE_ACTIVE INCLUDE-->", active_xml)
         scene_xml = scene_xml.replace("<!--VEHICLE_STATIC INCLUDE-->", static_xml)
-        scene_xml = scene_xml.replace("<!--ACTUATOR INCLUDE-->", actuator_xml)
-
+        scene_xml = scene_xml.replace("<!--ACTUATOR INCLUDE-->",     actuator_xml)
         return scene_xml
 
-    # Simulation Reset
+    # ---------- 리셋 ----------
     def reset(self):
         mujoco.mj_resetData(self.model, self.data)
         self.done = False
         return self._get_obs()
 
-    # Vehicle Environment 진행 
-    def step(self, action):
+    # ---------- 스텝 ----------
+    def step(self, action: dict):
         """
-        Args:
-            action (dict): {"throttle", "reverse", "steer", "brake"}
+        Args
+        ----
+        action: dict
+            {"throttle": float, "reverse": float, "steer": float, "brake": float}
         """
-        # 1) 기본 control 계산
+        dt = float(self.model.opt.timestep)
+
+        # 1) 기본 control 구성(엔진/조향/서스펜션)
         suspension = [0.0, 0.0, 0.0, 0.0]
         ctrl = compose_control(action, suspension)
 
-        # 2) 브레이크 계산
-        veh_v = np.linalg.norm(self.data.qvel[:2])  # XY 속도
-        wheel_states = [WheelState(w=0.0, R=0.3, load=self.ebrake.m * 9.81 / 4)] * 4
-        torques = self.ebrake.compute_wheel_torques(
-            pedal=action.get("brake", 0.0),
-            veh_v=veh_v,
-            wheels_front=wheel_states[:2],
-            wheels_rear=wheel_states[2:],
-            dt=self.model.opt.timestep
+        # 2) baseline ctrl 먼저 적용 (이후 AEB가 덮어씀)
+        self.data.ctrl[:] = ctrl
+
+        # 3) 운전자 브레이크(마찰손실 기반)
+        self.ebrake.apply_brake(action.get("brake", 0.0), dt)
+
+        # 4) AEB (활성 시 frictionloss + 휠 역토크 병행)
+        info_aeb = self.aeb.apply(
+            self.ebrake, t=self.data.time, model=self.model, data=self.data, dt=dt, brake_level=0.95
         )
 
-        ctrl[:4] -= torques
-
-        # MuJoCo step
-        self.data.ctrl[:] = ctrl
+        # 5) 물리 스텝
         mujoco.mj_step(self.model, self.data)
 
         obs = self._get_obs()
-        reward, done, info = 0.0, self.done, {}
-
+        reward, done, info = 0.0, self.done, {"aeb": info_aeb}
         return obs, reward, done, info
 
-    # Vehicle Observation 반환 
+    # ---------- 관측값 ----------
     def _get_obs(self):
         return np.concatenate([self.data.qpos, self.data.qvel])

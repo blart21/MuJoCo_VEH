@@ -28,6 +28,10 @@
               condim="3"
               solmix="0.0001"
               priority="1"/>
+        <light name="sun_key"
+            pos="0 0 12" dir="0 0 -1" directional="true"
+            diffuse="0.75 0.75 0.75" ambient="0.30 0.30 0.30" specular="0.15 0.15 0.15"
+            castshadow="false"/>
 
         <!-- VEHICLE_ACTIVE INCLUDE -->
         <!-- VEHICLE_STATIC INCLUDE -->

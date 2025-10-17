@@ -1,15 +1,16 @@
 <sensor>
-    <accelerometer name="accel_z" site="driver_seat"/>
-    <gyro name="gyro_pitch" site="driver_seat"/>
-    <framepos name="lidar"  objtype="site" objname="lidar"/>
+  <accelerometer name="accel_z" site="driver_seat"/>
+  <gyro          name="gyro_pitch" site="driver_seat"/>
+  <framepos      name="lidar_high_pos" objtype="site" objname="lidar_high"/>
+  <framepos      name="lidar_low_pos"  objtype="site" objname="lidar_low"/>
 </sensor>
   
 <actuator>
     <!-- 바퀴 구동 -->
-    <motor name="fl_motor" joint="fl_wheel" ctrlrange="-700 700" gear="1.0"/>
-    <motor name="fr_motor" joint="fr_wheel" ctrlrange="-700 700" gear="1.0"/>
-    <motor name="rl_motor" joint="rl_wheel" ctrlrange="-700 700" gear="1.0"/>
-    <motor name="rr_motor" joint="rr_wheel" ctrlrange="-700 700" gear="1.0"/>
+    <motor name="fl_motor" joint="fl_wheel" ctrlrange="-10000 10000" gear="1.0"/>
+    <motor name="fr_motor" joint="fr_wheel" ctrlrange="-10000 10000" gear="1.0"/>
+    <motor name="rl_motor" joint="rl_wheel" ctrlrange="-10000 10000" gear="1.0"/>
+    <motor name="rr_motor" joint="rr_wheel" ctrlrange="-10000 10000" gear="1.0"/>
 
     <!-- 서스펜션 -->
     <motor name="fl_act" joint="fl_suspension" gear="1.0" ctrlrange="-12000 12000"/>
