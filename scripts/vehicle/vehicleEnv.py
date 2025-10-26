@@ -48,15 +48,10 @@ class VehicleEnv:
         # - 하단 라이다(lidar_low)만 임계/거리 오버라이드로 더 민감하게
         self.aeb = AEBRadarMulti(
             site_names=("lidar_high", "lidar_low"),
-            tilt_deg=-1.0,
+            tilt_deg=0.0,
             ema_alpha=0.30,
-            hold_time=0.6,
             self_clearance=0.12,
-            min_active_time=0.35,
-            cooldown_after_release=0.20,
-            consec_on_frames=2,
-            consec_off_frames=6,
-            motor_brake_K=2000.0,            # 역토크 계수(강하게)
+            motor_brake_K=2000.0,
             clamp_ctrl=10000.0,
             zero_drive_when_aeb=True,
             static_brake_torque=5000.0,

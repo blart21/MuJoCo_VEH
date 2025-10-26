@@ -158,32 +158,36 @@ def _center_dist_str(
 
 # ============================================================
 # HUD 문자열 빌더
-#   - 1줄: 속도(m/s, km/h) + source
-#   - 2줄: 라이다 High/Low 중앙 레이 거리
 # ============================================================
 
 def hud_strings(
     model,
     data,
     *,
+    aeb_info: dict,
     speed_site_candidates: tuple[str, ...] = ("lidar", "lidar_high", "lidar_low"),
-    high_site: str = "lidar_high",
-    low_site: str = "lidar_low",
-    tilt_deg: float = -1.0,
-    max_dist: float = 80.0,
+    **kwargs,
 ) -> tuple[str, str]:
     """
     뷰어 오버레이용 텍스트 두 줄을 만들어 반환.
     """
+    # 1) 속도 정보
     v_mps, v_kmh, v_src = get_forward_speed_robust(
         model, data,
         speed_site_candidates=speed_site_candidates,
         body_candidates=("chassis", None),
         geom_candidates=("chassis_geom",),
     )
-    hi = _center_dist_str(model, data, high_site, tilt_deg=tilt_deg, max_dist=max_dist)
-    lo = _center_dist_str(model, data, low_site,  tilt_deg=tilt_deg, max_dist=max_dist)
+    line1 = f"Time: {data.time:6.2f}s | Speed: {v_mps:4.2f} m/s  ({v_kmh:4.1f} km/h)  [{v_src}]"
 
-    line1 = f"Speed: {v_mps:4.2f} m/s  ({v_kmh:4.1f} km/h)  [{v_src}]"
-    line2 = f"Lidar High: {hi}   Low: {lo}"
+    # 2) AEB 상태, 거리, TTC
+    dist = aeb_info.get("dmin_ema", float('inf'))
+    ttc = aeb_info.get("ttc", float('inf'))
+    state = aeb_info.get("aeb_state", "N/A")
+
+    dist_str = f"{dist:4.1f}m" if dist < 1000 else "---"
+    ttc_str = f"{ttc:4.2f}s" if ttc < 1000 else "---"
+
+    line2 = f"AEB: {state:<9} | Dist: {dist_str} | TTC: {ttc_str}"
+
     return line1, line2

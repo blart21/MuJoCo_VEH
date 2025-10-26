@@ -5,12 +5,14 @@
   <asset>
     <texture name="grid" type="2d" builtin="checker" rgb1="0.2 0.3 0.4" rgb2="0.8 0.8 0.8" width="512" height="512"/>
     <material name="grid_mat" texture="grid" texrepeat="5 5" specular="0.3" shininess="0.3"/>
-    <texture name="wheel_pattern" type="2d" builtin="checker" rgb1="1 1 1" rgb2="0 0 0" width="64" height="64"/>
-    <material name="wheel_mat" texture="wheel_pattern" texrepeat="8 1" specular="0.5" shininess="0.5"/>
+    <texture name="wheel_pattern" type="cube" builtin="checker" rgb1="1 1 1" rgb2="0 0 0" width="64" height="64"/>
+    <material name="wheel_mat" texture="wheel_pattern"
+              texrepeat="10 2" texuniform="true"
+              specular="0.4" shininess="0.3" reflectance="0.05"/>
   </asset>
 
   <worldbody>
-    <geom name="floor" type="plane" size="150 150 0.3" rgba="0.8 0.8 0.8 1" material="grid_mat" friction="1.0 0.2 0.01"/>
+    <geom name="floor" type="plane" size="150 150 0.3" rgba="0.8 0.8 0.8 1" material="grid_mat" friction="2.0 0.2 0.01"/>
     <light name="sun_key"
        pos="0 0 12" dir="0 0 -1" directional="true"
        diffuse="0.9 0.9 0.9" ambient="0.45 0.45 0.45" specular="0.2 0.2 0.2"

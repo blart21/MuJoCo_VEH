@@ -32,7 +32,7 @@ class EBrake:
         self.model = model
         self.data = data
         self.m = kwargs.get("mass_kg", 1300.0)
-        self.frictionloss_max = kwargs.get("frictionloss_max", 600.0)
+        self.frictionloss_max = kwargs.get("frictionloss_max", 2500.0)
         self.brake_tau = kwargs.get("tau_actuator", 0.05)
 
         # 휠 조인트 이름 (모델 이름과 반드시 일치해야 함)

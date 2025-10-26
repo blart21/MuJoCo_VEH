@@ -64,11 +64,8 @@ def main():
         # 3) HUD 문자열 큐잉 (렌더 전에 세팅)
         l1, l2 = hud_strings(
             env.model, env.data,
-            speed_site_candidates=("lidar_front", "lidar_high", "lidar_low"),
-            high_site="lidar_high",
-            low_site="lidar_low",
-            tilt_deg=-1.0,
-            max_dist=80.0,
+            aeb_info=info.get("aeb", {}), 
+            speed_site_candidates=("lidar_front", "lidar_high", "lidar_low")
         )
         viewer.queue_overlay(l1, l2)
 
