@@ -4,21 +4,23 @@
   <framepos      name="lidar_high_pos" objtype="site" objname="lidar_high"/>
   <framepos      name="lidar_low_pos"  objtype="site" objname="lidar_low"/>
 </sensor>
-  
-<actuator>
-    <!-- 바퀴 구동 -->
+
+<mujoco model="actuator_block">
+  <actuator>
+    <!-- 바퀴 구동 (유지) -->
     <motor name="fl_motor" joint="fl_wheel" ctrlrange="-10000 10000" gear="1.0"/>
     <motor name="fr_motor" joint="fr_wheel" ctrlrange="-10000 10000" gear="1.0"/>
     <motor name="rl_motor" joint="rl_wheel" ctrlrange="-10000 10000" gear="1.0"/>
     <motor name="rr_motor" joint="rr_wheel" ctrlrange="-10000 10000" gear="1.0"/>
 
-    <!-- 서스펜션 -->
+    <!-- 서스펜션 액추에이터 (능동제어 시 사용) -->
     <motor name="fl_act" joint="fl_suspension" gear="1.0" ctrlrange="-12000 12000"/>
     <motor name="fr_act" joint="fr_suspension" gear="1.0" ctrlrange="-12000 12000"/>
     <motor name="rl_act" joint="rl_suspension" gear="1.0" ctrlrange="-12000 12000"/>
     <motor name="rr_act" joint="rr_suspension" gear="1.0" ctrlrange="-12000 12000"/>
 
-    <!-- 조향 -->
-    <motor name="steer_fl_motor" joint="steer_fl" ctrlrange="-1.0 1.0" gear="3000"/>
-    <motor name="steer_fr_motor" joint="steer_fr" ctrlrange="-1.0 1.0" gear="3000"/>
-</actuator>
+    <!-- 조향: 토크 모터 → 포지션 서보 (목표각 직접 제어) -->
+    <position name="steer_fl_pos" joint="steer_fl" kp="4000" ctrlrange="-0.8 0.8"/>
+    <position name="steer_fr_pos" joint="steer_fr" kp="4000" ctrlrange="-0.8 0.8"/>
+  </actuator>
+</mujoco>

@@ -11,10 +11,12 @@
 # ------------------------------------------------------------
 
 from __future__ import annotations
-from vehicle.vehicleEnv import VehicleEnv
-from util.viewer import Viewer
-from interface.input_manager import InputManager
-from overlay import hud_strings
+
+# ✅ 모듈 실행(방법 A)에 맞춘 상대 임포트
+from .vehicle.vehicleEnv import VehicleEnv
+from .util.viewer import Viewer
+from .interface.input_manager import InputManager
+from .overlay import hud_strings
 
 
 def main():
@@ -26,15 +28,6 @@ def main():
     viewer = Viewer(env.model, env.data, title="MuJoCo Custom Viewer")
 
     # ---------- 카메라 추적 세팅 ----------
-    # mode="site"        : site 기준 추적(차량 모델의 특정 지점)
-    # target_name        : 기본은 "lidar_front". 만약 모델에 없으면 뷰어 내부에서 자동 폴백(lidar_* → chassis 등)
-    # distance           : 타깃에서의 카메라 거리
-    # elevation          : 음수면 약간 내려다보는 시점
-    # azimuth_mode       : "fixed" → 월드 고정 방위각(차량 yaw와 무관), "heading" → 차량 전방(x축) 기준
-    # fixed_azimuth_deg  : azimuth_mode="fixed"일 때 카메라 방위각(예: +x=0°, +y=90°)
-    # lookat_offset      : 타깃 기준 lookat 오프셋(미세 상향/중앙 보정용)
-    # offset_in_world    : True면 lookat_offset을 월드 좌표로, False면 타깃 로컬 좌표로 적용
-    # smooth             : 카메라 파라미터 EMA(0~1) (값 클수록 현재 프레임을 더 따름)
     viewer.enable_follow(
         mode="site",
         target_name="lidar_front",
@@ -64,7 +57,7 @@ def main():
         # 3) HUD 문자열 큐잉 (렌더 전에 세팅)
         l1, l2 = hud_strings(
             env.model, env.data,
-            aeb_info=info.get("aeb", {}), 
+            aeb_info=info.get("aeb", {}),
             speed_site_candidates=("lidar_front", "lidar_high", "lidar_low")
         )
         viewer.queue_overlay(l1, l2)

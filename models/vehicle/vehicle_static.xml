@@ -1,17 +1,30 @@
-    <!-- ========== 차량2 (정적 장애물: 모양만, 기능 없음) ========== -->
-    <!-- joint(관절) 없음 → 월드에 용접됨(고정). AEB/레이더의 장애물로만 사용 -->
-    <body name="vehicle_static" pos="30 0 0.4">
+<mujoco model="vehicle_static">
+  <compiler inertiafromgeom="true"/>
+  <option timestep="0.002" gravity="0 0 -9.81"/>
+
+  <asset>
+    <texture name="wheel_pattern" type="cube" builtin="checker" rgb1="1 1 1" rgb2="0 0 0" width="64" height="64"/>
+    <material name="wheel_mat" texture="wheel_pattern"
+              texrepeat="10 2" texuniform="true"
+              specular="0.4" shininess="0.3" reflectance="0.05"/>
+  </asset>
+
+  <worldbody>
+    <!-- 차량2 (정적 장애물) -->
+    <body name="static_car" pos="30 0 0.86">
       <!-- 차체 모양 -->
-      <geom name="target_chassis" type="box" size="1.55 1.5 0.09" rgba="0 0 1 1"/>
+      <geom name="chassis_geom_static" type="box"
+            size="2.35 0.94 0.72" rgba="0 0 1 1"/>
 
       <!-- 바퀴 모양(지오메트리만, 동작 없음) -->
-      <geom name="target_fl_wheel" type="cylinder" size="0.3 0.09"
-            pos=" 1.55  1.65 -0.09" euler="90 0 0" material="wheel_mat" rgba="0.2 0.2 0.2 1"/>
-      <geom name="target_fr_wheel" type="cylinder" size="0.3 0.09"
-            pos=" 1.55 -1.65 -0.09" euler="90 0 0" material="wheel_mat" rgba="0.2 0.2 0.2 1"/>
-      <geom name="target_rl_wheel" type="cylinder" size="0.3 0.09"
-            pos="-1.55  1.65 -0.09" euler="90 0 0" material="wheel_mat" rgba="0.2 0.2 0.2 1"/>
-      <geom name="target_rr_wheel" type="cylinder" size="0.3 0.09"
-            pos="-1.55 -1.65 -0.09" euler="90 0 0" material="wheel_mat" rgba="0.2 0.2 0.2 1"/>
+      <geom name="static_fl_wheel" type="cylinder" size="0.33 0.10"
+            pos=" 1.40  1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
+      <geom name="static_fr_wheel" type="cylinder" size="0.33 0.10"
+            pos=" 1.40 -1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
+      <geom name="static_rl_wheel" type="cylinder" size="0.33 0.10"
+            pos="-1.40  1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
+      <geom name="static_rr_wheel" type="cylinder" size="0.33 0.10"
+            pos="-1.40 -1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
     </body>
-    <!-- ===== 차량2 끝 ===== -->
+  </worldbody>
+</mujoco>

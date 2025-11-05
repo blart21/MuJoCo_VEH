@@ -2,7 +2,7 @@
 from __future__ import annotations
 import numpy as np
 import mujoco
-from perception.aeb_lidar import get_aeb_scan_with_tilt
+from .perception.aeb_lidar import get_aeb_scan_with_tilt
 
 
 # ============================================================
@@ -36,10 +36,10 @@ def _try_get_site_forward_speed(model, data, site_name: str) -> tuple[float | No
         else:
             return None, "no_cvel"
 
-    # site의 전방축(+x)을 월드로 가져와 투영
-    R_sw = np.array(data.site_xmat[sid], dtype=float).reshape(3, 3)
-    x_world = R_sw[:, 0]
-    v_fwd = float(np.dot(v_world, x_world))
+    # 로컬 변환: v_local = R^T * v_world → 로컬 x 성분
+    R_sw = np.array(data.site_xmat[sid], dtype=float).reshape(3, 3)  # site->world
+    v_local = R_sw.T @ v_world
+    v_fwd = float(v_local[0])
     return v_fwd, src
 
 
@@ -56,9 +56,9 @@ def _try_get_body_forward_speed(model, data, body_name: str | None) -> tuple[flo
 
     if hasattr(data, "cvel") and data.cvel.shape[0] > bid:
         v_world = np.array(data.cvel[bid][3:6], dtype=float)
-        R_bw = np.array(data.xmat[bid], dtype=float).reshape(3, 3)
-        x_world = R_bw[:, 0]
-        v_fwd = float(np.dot(v_world, x_world))
+        R_bw = np.array(data.xmat[bid], dtype=float).reshape(3, 3)  # body->world
+        v_local = R_bw.T @ v_world
+        v_fwd = float(v_local[0])
         name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, bid)
         return v_fwd, f"bodyV: {name}"
     return None, "no_cvel_body"
@@ -74,9 +74,9 @@ def _try_get_chassis_by_geom(model, data, geom_name: str = "chassis_geom") -> tu
     bid = int(model.geom_bodyid[gid])
     if hasattr(data, "cvel") and data.cvel.shape[0] > bid:
         v_world = np.array(data.cvel[bid][3:6], dtype=float)
-        R_bw = np.array(data.xmat[bid], dtype=float).reshape(3, 3)
-        x_world = R_bw[:, 0]
-        v_fwd = float(np.dot(v_world, x_world))
+        R_bw = np.array(data.xmat[bid], dtype=float).reshape(3, 3)  # body->world
+        v_local = R_bw.T @ v_world
+        v_fwd = float(v_local[0])
         return v_fwd, f"bodyV[geom]: {geom_name}"
     return None, "no_cvel_geom"
 
@@ -99,21 +99,18 @@ def get_forward_speed_robust(
     for s in speed_site_candidates:
         v, src = _try_get_site_forward_speed(model, data, s)
         if v is not None:
-            v = max(0.0, v)  # HUD는 후진 0으로
             return v, 3.6 * v, src
 
     # 2) body
     for b in body_candidates:
         v, src = _try_get_body_forward_speed(model, data, b)
         if v is not None:
-            v = max(0.0, v)
             return v, 3.6 * v, src
 
     # 3) geom
     for g in geom_candidates:
         v, src = _try_get_chassis_by_geom(model, data, g)
         if v is not None:
-            v = max(0.0, v)
             return v, 3.6 * v, src
 
     # 실패 시
