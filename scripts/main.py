@@ -34,7 +34,7 @@ def main():
         distance=12.0,
         elevation=-15.0,
         azimuth_mode="fixed",
-        fixed_azimuth_deg=0.0,
+        fixed_azimuth_deg= 0.0,
         lookat_offset=(0.0, 0.0, 0.7),
         offset_in_world=True,
         smooth=0.25,
