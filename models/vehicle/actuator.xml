@@ -8,10 +8,10 @@
 <mujoco model="actuator_block">
   <actuator>
     <!-- 바퀴 구동 (유지) -->
-    <motor name="fl_motor" joint="fl_wheel" ctrlrange="-10000 10000" gear="1.0"/>
-    <motor name="fr_motor" joint="fr_wheel" ctrlrange="-10000 10000" gear="1.0"/>
-    <motor name="rl_motor" joint="rl_wheel" ctrlrange="-10000 10000" gear="1.0"/>
-    <motor name="rr_motor" joint="rr_wheel" ctrlrange="-10000 10000" gear="1.0"/>
+    <motor name="fl_motor" joint="fl_wheel" ctrlrange="-6000 6000" gear="0.7"/>
+    <motor name="fr_motor" joint="fr_wheel" ctrlrange="-6000 6000" gear="0.7"/>
+    <motor name="rl_motor" joint="rl_wheel" ctrlrange="-6000 6000" gear="0.7"/>
+    <motor name="rr_motor" joint="rr_wheel" ctrlrange="-6000 6000" gear="0.7"/>
 
     <!-- 서스펜션 액추에이터 (능동제어 시 사용) -->
     <motor name="fl_act" joint="fl_suspension" gear="1.0" ctrlrange="-12000 12000"/>
