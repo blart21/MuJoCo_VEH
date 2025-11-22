@@ -3,28 +3,65 @@
   <option timestep="0.002" gravity="0 0 -9.81"/>
 
   <asset>
-    <texture name="wheel_pattern" type="cube" builtin="checker" rgb1="1 1 1" rgb2="0 0 0" width="64" height="64"/>
+    <texture name="wheel_pattern" type="cube" builtin="checker"
+             rgb1="1 1 1" rgb2="0 0 0" width="64" height="64"/>
     <material name="wheel_mat" texture="wheel_pattern"
               texrepeat="10 2" texuniform="true"
               specular="0.4" shininess="0.3" reflectance="0.05"/>
   </asset>
 
   <worldbody>
-    <!-- 차량2 (정적 장애물) -->
-    <body name="static_car" pos="30 0 0.86">
-      <!-- 차체 모양 -->
-      <geom name="chassis_geom_static" type="box"
-            size="2.35 0.94 0.72" rgba="0 0 1 1"/>
 
-      <!-- 바퀴 모양(지오메트리만, 동작 없음) -->
-      <geom name="static_fl_wheel" type="cylinder" size="0.33 0.10"
+    <!-- ========================================================= -->
+    <!-- ================ CASE 1 : STATIC VEHICLE ================= -->
+    <!-- ========================================================= -->
+
+    <body name="static_car" pos="60 0 0.87">
+      <geom type="box" size="2.35 0.94 0.72" rgba="0 0 1 1"/>
+      <geom type="cylinder" size="0.33 0.10"
             pos=" 1.40  1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
-      <geom name="static_fr_wheel" type="cylinder" size="0.33 0.10"
+      <geom type="cylinder" size="0.33 0.10"
             pos=" 1.40 -1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
-      <geom name="static_rl_wheel" type="cylinder" size="0.33 0.10"
+      <geom type="cylinder" size="0.33 0.10"
             pos="-1.40  1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
-      <geom name="static_rr_wheel" type="cylinder" size="0.33 0.10"
+      <geom type="cylinder" size="0.33 0.10"
             pos="-1.40 -1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
     </body>
+
+
+    <!-- ========================================================= -->
+    <!-- ================ CASE 2 : MOVING VEHICLE ================= -->
+    <!-- ========================================================= -->
+          <!--
+<body name="moving_car" pos="60 0 0.87">
+
+      <joint name="move_x" type="slide" axis="1 0 0" limited="false" damping="0.01"/>
+
+      <geom type="box" size="2.35 0.94 0.72" rgba="0 0 0.8 1"/>
+      <geom type="cylinder" size="0.33 0.10"
+            pos=" 1.40  1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
+      <geom type="cylinder" size="0.33 0.10"
+            pos=" 1.40 -1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
+      <geom type="cylinder" size="0.33 0.10"
+            pos="-1.40  1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
+      <geom type="cylinder" size="0.33 0.10"
+            pos="-1.40 -1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
+
+    </body>
+    -->
+      
   </worldbody>
+
+  <actuator>
+    <velocity name="car_speed"
+              joint="move_x"
+              ctrlrange="0 50"
+              kv="100000"/>
+  </actuator>
+
+  <keyframe>
+    <key qpos="0" ctrl="13.888"/>
+  </keyframe>
+
+
 </mujoco>
