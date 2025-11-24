@@ -16,52 +16,24 @@
     <!-- ================ CASE 1 : STATIC VEHICLE ================= -->
     <!-- ========================================================= -->
 
-    <body name="static_car" pos="60 0 0.87">
-      <geom type="box" size="2.35 0.94 0.72" rgba="0 0 1 1"/>
-      <geom type="cylinder" size="0.33 0.10"
-            pos=" 1.40  1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
-      <geom type="cylinder" size="0.33 0.10"
-            pos=" 1.40 -1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
-      <geom type="cylinder" size="0.33 0.10"
-            pos="-1.40  1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
-      <geom type="cylinder" size="0.33 0.10"
-            pos="-1.40 -1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
-    </body>
+    <body name="static_car" pos="60 0 1.0025">
+      <!-- 차체 크기 수정 -->
+      <geom type="box" size="2.3275 0.945 0.8025" rgba="0 0 1 1"/>
 
+      <!-- 앞왼쪽 -->
+      <geom type="cylinder" size="0.37 0.1275" pos=" 1.50  0.82 -0.765" euler="90 0 0" material="wheel_mat"/>
 
-    <!-- ========================================================= -->
-    <!-- ================ CASE 2 : MOVING VEHICLE ================= -->
-    <!-- ========================================================= -->
-          <!--
-<body name="moving_car" pos="60 0 0.87">
+      <!-- 앞오른쪽 -->
+      <geom type="cylinder" size="0.37 0.1275" pos=" 1.50 -0.82 -0.765" euler="90 0 0" material="wheel_mat"/>
 
-      <joint name="move_x" type="slide" axis="1 0 0" limited="false" damping="0.01"/>
+      <!-- 뒤왼쪽 -->
+      <geom type="cylinder" size="0.37 0.1275" pos="-1.50  0.82 -0.765" euler="90 0 0" material="wheel_mat"/>
 
-      <geom type="box" size="2.35 0.94 0.72" rgba="0 0 0.8 1"/>
-      <geom type="cylinder" size="0.33 0.10"
-            pos=" 1.40  1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
-      <geom type="cylinder" size="0.33 0.10"
-            pos=" 1.40 -1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
-      <geom type="cylinder" size="0.33 0.10"
-            pos="-1.40  1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
-      <geom type="cylinder" size="0.33 0.10"
-            pos="-1.40 -1.06 -0.53" euler="90 0 0" material="wheel_mat"/>
+      <!-- 뒤오른쪽 -->
+      <geom type="cylinder" size="0.37 0.1275" pos="-1.50 -0.82 -0.765" euler="90 0 0" material="wheel_mat"/>
 
     </body>
-    -->
-      
+
   </worldbody>
-
-  <actuator>
-    <velocity name="car_speed"
-              joint="move_x"
-              ctrlrange="0 50"
-              kv="100000"/>
-  </actuator>
-
-  <keyframe>
-    <key qpos="0" ctrl="13.888"/>
-  </keyframe>
-
 
 </mujoco>
